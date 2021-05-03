@@ -103,6 +103,7 @@ export function submitProfileTab(newState: Object): Function {
 
         if (newState.displayName !== currentState.displayName) {
             APP.conference.changeLocalDisplayName(newState.displayName);
+            APP.conference.changeLocalPointer('testttttttt');
         }
 
         if (newState.email !== currentState.email) {

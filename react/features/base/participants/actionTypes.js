@@ -53,6 +53,8 @@ export const MUTE_REMOTE_PARTICIPANT = 'MUTE_REMOTE_PARTICIPANT';
  */
 export const PARTICIPANT_DISPLAY_NAME_CHANGED
     = 'PARTICIPANT_DISPLAY_NAME_CHANGED';
+export const PARTICIPANT_POINTER
+        = 'PARTICIPANT_POINTER';
 
 /**
  * Action to signal that ID of participant has changed. This happens when

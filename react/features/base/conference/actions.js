@@ -54,7 +54,8 @@ import {
 import {
     AVATAR_URL_COMMAND,
     EMAIL_COMMAND,
-    JITSI_CONFERENCE_URL_KEY
+    JITSI_CONFERENCE_URL_KEY,
+    POINTER_COMMAND
 } from './constants';
 import {
     _addLocalTracksToConference,
@@ -163,7 +164,6 @@ function _addConferenceListeners(conference, dispatch, state) {
             }
         });
 
-    // Dispatches into features/base/participants follow:
     conference.on(
         JitsiConferenceEvents.DISPLAY_NAME_CHANGED,
         (id, displayName) => dispatch(participantUpdated({
@@ -211,6 +211,13 @@ function _addConferenceListeners(conference, dispatch, state) {
             conference,
             id,
             avatarURL: data.value
+        })));
+    conference.addCommandListener(
+        POINTER_COMMAND,
+        (data, id) => dispatch(participantUpdated({
+            conference,
+            id,
+            pointerCoordinates: JSON.parse(data.value)
         })));
     conference.addCommandListener(
         EMAIL_COMMAND,

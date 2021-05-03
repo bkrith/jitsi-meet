@@ -27,6 +27,7 @@ import {
 import {
     AVATAR_URL_COMMAND,
     EMAIL_COMMAND,
+    POINTER_COMMAND,
     authStatusChanged,
     commonUserJoinedHandling,
     commonUserLeftHandling,
@@ -178,7 +179,8 @@ const commands = {
     CUSTOM_ROLE: 'custom-role',
     EMAIL: EMAIL_COMMAND,
     ETHERPAD: 'etherpad',
-    SHARED_VIDEO: 'shared-video'
+    SHARED_VIDEO: 'shared-video',
+    POINTER: POINTER_COMMAND
 };
 
 /**
@@ -2142,6 +2144,7 @@ export default {
                 });
             }
         );
+
         room.on(
             JitsiConferenceEvents.BOT_TYPE_CHANGED,
             (id, botType) => {
@@ -2221,6 +2224,19 @@ export default {
                         id: from,
                         avatarURL: data.value
                     }));
+            });
+
+        room.addCommandListener(
+            this.commands.defaults.POINTER,
+            (data, from) => {
+                APP.store.dispatch(
+                    participantUpdated({
+                        conference: room,
+                        id: from,
+                        pointerCoordinates: JSON.parse(data.value)
+                    }));
+                
+                console.log('PARTICIPANT UPDATED', JSON.parse(data.value));
             });
 
         APP.UI.addListener(UIEvents.NICKNAME_CHANGED,
@@ -3023,6 +3039,28 @@ export default {
         APP.store.dispatch(updateSettings({
             displayName: formattedNickname
         }));
+    },
+
+    /**
+     * Changes the display name for the local user
+     * @param nickname {string} the new display name
+     */
+    changeLocalPointer(pointerCoordinates = '') {
+        const { id } = getLocalParticipant(APP.store.getState());
+
+        APP.store.dispatch(participantUpdated({
+            // XXX Only the local participant is allowed to update without
+            // stating the JitsiConference instance (i.e. participant property
+            // `conference` for a remote participant) because the local
+            // participant is uniquely identified by the very fact that there is
+            // only one local participant.
+
+            id,
+            local: true,
+            pointerCoordinates: JSON.parse(pointerCoordinates)
+        }));
+        console.log('UPDATE PARTICIPANT');
+        sendData(commands.POINTER, pointerCoordinates);
     },
 
     /**

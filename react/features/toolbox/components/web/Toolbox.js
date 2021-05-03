@@ -193,6 +193,11 @@ type Props = {
     _raisedHand: boolean,
 
     /**
+     * Whether or not the local participant toggle pointer.
+     */
+     _pointer: boolean,
+
+    /**
      * Whether or not the local participant is screensharing.
      */
     _screensharing: boolean,
@@ -262,6 +267,7 @@ class Toolbox extends Component<Props> {
         this._onToolbarToggleFullScreen = this._onToolbarToggleFullScreen.bind(this);
         this._onToolbarToggleProfile = this._onToolbarToggleProfile.bind(this);
         this._onToolbarToggleRaiseHand = this._onToolbarToggleRaiseHand.bind(this);
+        this._onToolbarTogglePointer = this._onToolbarTogglePointer.bind(this);
         this._onToolbarToggleScreenshare = this._onToolbarToggleScreenshare.bind(this);
         this._onToolbarToggleShareAudio = this._onToolbarToggleShareAudio.bind(this);
         this._onToolbarOpenLocalRecordingInfoDialog = this._onToolbarOpenLocalRecordingInfoDialog.bind(this);
@@ -499,6 +505,29 @@ class Toolbox extends Component<Props> {
         }));
 
         APP.API.notifyRaiseHandUpdated(_localParticipantID, newRaisedStatus);
+    }
+
+    /**
+     * Dispatches an action to toggle the local participant's raised hand state.
+     *
+     * @private
+     * @returns {void}
+     */
+    _doTogglePointer() {
+        const { _localParticipantID, _pointer } = this.props;
+        const newPointerStatus = !_pointer;
+
+        this.props.dispatch(participantUpdated({
+            // XXX Only the local participant is allowed to update without
+            // stating the JitsiConference instance (i.e. participant property
+            // `conference` for a remote participant) because the local
+            // participant is uniquely identified by the very fact that there is
+            // only one local participant.
+
+            id: _localParticipantID,
+            local: true,
+            pointer: newPointerStatus
+        }));
     }
 
     /**
@@ -876,6 +905,23 @@ class Toolbox extends Component<Props> {
         this._doToggleRaiseHand();
     }
 
+    _onToolbarTogglePointer: () => void;
+
+    /**
+     * Creates an analytics toolbar event and dispatches an action for toggling
+     * raise hand.
+     *
+     * @private
+     * @returns {void}
+     */
+    _onToolbarTogglePointer() {
+        sendAnalytics(createToolbarEvent(
+            'pointer',
+            { enable: !this.props._pointer }));
+
+        this._doTogglePointer();
+    }
+
     _onToolbarToggleScreenshare: () => void;
 
     /**
@@ -1139,6 +1185,7 @@ class Toolbox extends Component<Props> {
             _desktopSharingEnabled,
             _desktopSharingDisabledTooltipKey,
             _raisedHand,
+            _pointer,
             _screensharing,
             t
         } = this.props;
@@ -1202,6 +1249,23 @@ class Toolbox extends Component<Props> {
                     key = 'raisehand'
                     onClick = { this._onToolbarToggleRaiseHand }
                     text = { t(`toolbar.${_raisedHand ? 'lowerYourHand' : 'raiseYourHand'}`) } />);
+        }
+
+        if (this._showDesktopSharingButton()) {
+            buttons.has('pointer')
+                ? mainMenuAdditionalButtons.push(<ToolbarButton
+                    accessibilityLabel = { t('toolbar.accessibilityLabel.raiseHand') }
+                    icon = { IconRaisedHand }
+                    key = 'pointer'
+                    onClick = { this._onToolbarTogglePointer }
+                    toggled = { _pointer }
+                    tooltip = { t(`toolbar.${_pointer ? 'lowerYourHand' : 'raiseYourHand'}`) } />)
+                : overflowMenuAdditionalButtons.push(<OverflowMenuItem
+                    accessibilityLabel = { t('toolbar.accessibilityLabel.raiseHand') }
+                    icon = { IconRaisedHand }
+                    key = 'pointer'
+                    onClick = { this._onToolbarTogglePointer }
+                    text = { t(`toolbar.${_pointer ? 'lowerYourHand' : 'raiseYourHand'}`) } />);
         }
 
         if (this._shouldShowButton('participants-pane') || this._shouldShowButton('invite')) {
@@ -1386,6 +1450,7 @@ function _mapStateToProps(state) {
         _overflowMenuVisible: overflowMenuVisible,
         _participantsPaneOpen: getParticipantsPaneOpen(state),
         _raisedHand: localParticipant.raisedHand,
+        _pointer: localParticipant.pointer,
         _screensharing: (localVideo && localVideo.videoType === 'desktop') || isScreenAudioShared(state),
         _visible: isToolboxVisible(state),
         _visibleButtons: getToolbarButtons(state)

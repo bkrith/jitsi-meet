@@ -74,6 +74,7 @@ const events = {
     'content-sharing-participants-changed': 'contentSharingParticipantsChanged',
     'device-list-changed': 'deviceListChanged',
     'display-name-change': 'displayNameChange',
+    'pointer': 'pointer',
     'email-change': 'emailChange',
     'endpoint-text-message-received': 'endpointTextMessageReceived',
     'feedback-submitted': 'feedbackSubmitted',
@@ -499,6 +500,14 @@ export default class JitsiMeetExternalAPI extends EventEmitter {
                 if (user) {
                     user.displayName = data.displayname;
                     user.formattedDisplayName = data.formattedDisplayName;
+                }
+                break;
+            }
+            case 'pointer': {
+                const user = this._participants[userID];
+
+                if (user) {
+                    user.pointerCoordinates = JSON.parse(data.pointerCoordinates);
                 }
                 break;
             }

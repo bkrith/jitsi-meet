@@ -20,6 +20,7 @@ import {
     KICK_PARTICIPANT,
     MUTE_REMOTE_PARTICIPANT,
     PARTICIPANT_DISPLAY_NAME_CHANGED,
+    PARTICIPANT_POINTER,
     PARTICIPANT_JOINED,
     PARTICIPANT_LEFT,
     PARTICIPANT_UPDATED
@@ -462,6 +463,25 @@ function _raiseHandUpdated({ dispatch, getState }, conference, participantId, ne
             titleKey: 'notify.raisedHand'
         }, NOTIFICATION_TIMEOUT));
     }
+}
+
+/**
+ * Handles a raise hand status update.
+ *
+ * @param {Function} dispatch - The Redux dispatch function.
+ * @param {Object} conference - The conference for which we got an update.
+ * @param {string} participantId - The ID of the participant from which we got an update.
+ * @param {boolean} newValue - The new value of the raise hand status.
+ * @returns {void}
+ */
+function _pointerUpdated({ dispatch, getState }, conference, participantId, newValue) {
+    const pointer = newValue === 'true';
+
+    dispatch(participantUpdated({
+        conference,
+        id: participantId,
+        pointer
+    }));
 }
 
 /**

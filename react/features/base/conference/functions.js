@@ -16,6 +16,7 @@ import { safeDecodeURIComponent } from '../util';
 import {
     AVATAR_URL_COMMAND,
     EMAIL_COMMAND,
+    POINTER_COMMAND,
     JITSI_CONFERENCE_URL_KEY
 } from './constants';
 import logger from './logger';
@@ -335,7 +336,8 @@ export function sendLocalParticipant(
         avatarURL,
         email,
         features,
-        name
+        name,
+        pointerCoordinates
     } = getLocalParticipant(stateful);
 
     avatarURL && conference.sendCommand(AVATAR_URL_COMMAND, {
@@ -344,6 +346,10 @@ export function sendLocalParticipant(
     email && conference.sendCommand(EMAIL_COMMAND, {
         value: email
     });
+
+    pointerCoordinates && conference.sendCommand(POINTER_COMMAND, {
+        value: pointerCoordinates
+    })
 
     if (features && features['screen-sharing'] === 'true') {
         conference.setLocalParticipantProperty('features_screen-sharing', true);

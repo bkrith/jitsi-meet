@@ -92,6 +92,9 @@ function initCommands() {
             sendAnalytics(createApiEvent('display.name.changed'));
             APP.conference.changeLocalDisplayName(displayName);
         },
+        'pointer': pointerCoordinates => {
+            APP.conference.changeLocalPointer(pointerCoordinates);
+        },
         'mute-everyone': mediaType => {
             const muteMediaType = mediaType ? mediaType : MEDIA_TYPE.AUDIO;
 
@@ -612,6 +615,20 @@ class API {
      * @param {Object} event - The message to pass onto spot.
      * @returns {void}
      */
+    sendPointerCoordinates(pointerCoordinates: string) {
+        this._sendEvent({
+            name: 'pointer',
+            pointerCoordinates
+        });
+    }
+
+    /**
+     * Notifies the external application (spot) that the local jitsi-participant
+     * has a status update.
+     *
+     * @param {Object} event - The message to pass onto spot.
+     * @returns {void}
+     */
     sendProxyConnectionEvent(event: Object) {
         this._sendEvent({
             name: 'proxy-connection-event',
@@ -626,6 +643,7 @@ class API {
      * @returns {void}
      */
     _sendEvent(event: Object = {}) {
+        if (event.name === 'pointer') console.log(event);
         if (this._enabled) {
             transport.sendEvent(event);
         }

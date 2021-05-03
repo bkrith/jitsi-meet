@@ -143,6 +143,12 @@ export const PIP_ENABLED = 'pip.enabled';
 export const RAISE_HAND_ENABLED = 'raise-hand.enabled';
 
 /**
+ * Flag indicating if raise hand feature should be enabled.
+ * Default: enabled.
+ */
+export const POINTER_ENABLED = 'pointer.enabled';
+
+/**
  * Flag indicating if recording should be enabled.
  * Default: auto-detected.
  */

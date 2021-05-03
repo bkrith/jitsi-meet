@@ -231,6 +231,62 @@ export class VideoContainer extends LargeContainer {
 
         this.$wrapper = $('#largeVideoWrapper');
 
+        const pointerCoordinates = {
+            x: 0,
+            y: 0,
+            enabled: false
+        };
+
+        let isPointerEnabled = false;
+
+        setInterval(() => {
+            const prevStatus = isPointerEnabled;
+            isPointerEnabled = APP.store.getState()['features/base/participants'].filter((p) => p.local)[0].pointer;
+            if (isPointerEnabled) {
+                pointerCoordinates.x = pointerCoordinates.x < 0 ? 0 : pointerCoordinates.x;
+                pointerCoordinates.y = pointerCoordinates.y < 0 ? 0 : pointerCoordinates.y;
+                pointerCoordinates.enabled = true;
+                APP.conference.changeLocalPointer(JSON.stringify(pointerCoordinates));
+            }
+            else if (prevStatus) {
+                pointerCoordinates.enabled = false;
+                APP.conference.changeLocalPointer(JSON.stringify(pointerCoordinates));
+            }
+
+            APP.store.getState()['features/base/participants'].filter((p) => p && p.pointerCoordinates && p.pointerCoordinates.enabled && !p.local).forEach((p) => {
+                const pointer = $('.pointer');
+
+                if (pointer.length) {
+                    pointer.css('top', 100 + (lgheight * p.pointerCoordinates.y));
+                    pointer.css('left', (lgwidth * p.pointerCoordinates.x));
+                }
+                else {
+                    ppp.top = 100 + (lgheight * p.pointerCoordinates.y);
+                    ppp.left = (lgwidth * p.pointerCoordinates.x);
+                    lgVidWrapper.append(ppp);
+                }
+            });
+        }, 1000);
+
+        const lgVid = $('#largeVideo');
+
+        const lgVidWrapper = $('#largeVideoWrapper');
+        const lgheight = lgVidWrapper.height();
+        const lgwidth = lgVidWrapper.width();
+        const ppp = document.createElement('div');
+        ppp.className = 'pointer';
+        ppp.style.position = 'absolute';
+        ppp.style.background = 'yellow';
+        ppp.style.color = 'red';
+        ppp.innerHTML = '<span id="point">TEST<span>';
+        
+        lgVid.mousemove((e) => {
+            if (isPointerEnabled) {
+                pointerCoordinates.x = (e.clientX - lgVid.offset().left) / $(this).width();
+                pointerCoordinates.y = e.clientY / $(this).height();
+            }
+        });
+
         /**
          * FIXME: currently using parent() because I can't come up with name
          * for id. We'll need to probably refactor the HTML related to the large
